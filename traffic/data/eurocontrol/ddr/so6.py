@@ -290,9 +290,7 @@ class Flight(FlightMixin):
     def between(
         self, start: timelike, stop: time_or_delta, strict: bool = True
     ) -> "Flight":
-        """
-        WARNING: strict: bool = True is not taken into account yet.
-        """
+
         start = to_datetime(start)
         if isinstance(stop, timedelta):
             stop = start + stop
@@ -300,7 +298,10 @@ class Flight(FlightMixin):
             stop = to_datetime(stop)
 
         t: np.ndarray = np.stack(list(self.timestamp))
-        index = np.where((start < t) & (t < stop))
+        if strict is True:
+            index = np.where((start <= t) & (t <= stop))
+        else:
+            index = np.where((start < t) & (t < stop))
 
         new_data: np.ndarray = np.stack(list(self.coords))[index]
         time1: List[datetime] = [start, *t[index]]
